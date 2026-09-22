@@ -3,14 +3,13 @@
  * Configuración general del sitio y conexión a la base de datos.
  */
 
-// ---- Datos de conexión a MySQL (Lee de Railway o usa Localhost por defecto) ----
+// Datos de conexión (Lee las variables de Railway o usa local por defecto)
 define('DB_HOST', getenv('DB_HOST') ?: 'localhost');
 define('DB_NAME', getenv('DB_NAME') ?: 'revista_digital');
 define('DB_USER', getenv('DB_USER') ?: 'root');
 define('DB_PASS', getenv('DB_PASS') !== false ? getenv('DB_PASS') : '');
 define('DB_PORT', getenv('DB_PORT') ?: '3306');
 
-// ---- Ruta base del sitio ----
 define('BASE_URL', getenv('RAILWAY_PUBLIC_DOMAIN') ? 'https://' . getenv('RAILWAY_PUBLIC_DOMAIN') : 'http://localhost/dyd-cms');
 
 date_default_timezone_set('America/Lima');
