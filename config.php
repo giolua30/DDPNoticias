@@ -1,25 +1,23 @@
 <?php
 /**
  * Configuración general del sitio y conexión a la base de datos.
- * EDITA los datos de abajo según tu XAMPP / hosting.
  */
 
-// ---- Datos de conexión a MySQL ----
-define('DB_HOST', 'localhost');
-define('DB_NAME', 'revista_digital');
-define('DB_USER', 'root');   // en XAMPP normalmente es 'root'
-define('DB_PASS', '');       // en XAMPP normalmente está vacío
+// ---- Datos de conexión a MySQL (Lee de Railway o usa Localhost por defecto) ----
+define('DB_HOST', getenv('DB_HOST') ?: 'localhost');
+define('DB_NAME', getenv('DB_NAME') ?: 'revista_digital');
+define('DB_USER', getenv('DB_USER') ?: 'root');
+define('DB_PASS', getenv('DB_PASS') !== false ? getenv('DB_PASS') : '');
+define('DB_PORT', getenv('DB_PORT') ?: '3306');
 
-// ---- Ruta base del sitio (sin barra al final) ----
-// Ejemplo local XAMPP si la carpeta se llama "dyd-cms": http://localhost/dyd-cms
-// Ejemplo en tu hosting real: https://www.dialogoydesarrollo.com.pe
-define('BASE_URL', 'http://localhost/dyd-cms');
+// ---- Ruta base del sitio ----
+define('BASE_URL', getenv('RAILWAY_PUBLIC_DOMAIN') ? 'https://' . getenv('RAILWAY_PUBLIC_DOMAIN') : 'http://localhost/dyd-cms');
 
 date_default_timezone_set('America/Lima');
 
 try {
     $pdo = new PDO(
-        'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME . ';charset=utf8mb4',
+        'mysql:host=' . DB_HOST . ';port=' . DB_PORT . ';dbname=' . DB_NAME . ';charset=utf8mb4',
         DB_USER,
         DB_PASS,
         [
