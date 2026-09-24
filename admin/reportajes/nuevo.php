@@ -10,8 +10,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $resumen_corto = trim($_POST['resumen_corto']);
         $desarrollo    = trim($_POST['desarrollo']);
         $fecha         = $_POST['fecha_publicacion'];
-        $destacado     = isset($_POST['es_destacado']) ? 1 : 0;
+        $es_destacado  = isset($_POST['es_destacado']) ? 1 : 0;
         $autor_id      = (int) $_POST['autor_id'];
+
+        // --- NUEVO: Determinar el estado ---
+        $estado = 'publicado';
+        if (isset($_POST['accion_borrador']) || isset($_POST['accion_previsualizar'])) {
+            $estado = 'borrador';
+        }
 
         if ($titulo === '' || $desarrollo === '' || $fecha === '') {
             throw new Exception('Título, desarrollo y fecha son obligatorios.');
@@ -23,16 +29,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt = $pdo->prepare(
             "INSERT INTO reportajes
                 (titulo, resumen_corto, desarrollo, foto_principal, pdf_adjunto,
-                 fecha_publicacion, es_destacado, autor_id, usuario_id)
-             VALUES (?,?,?,?,?,?,?,?,?)"
+                 fecha_publicacion, es_destacado, autor_id, usuario_id, estado)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
         );
+
         $stmt->execute([
             $titulo, $resumen_corto, $desarrollo, $foto, $pdf,
-            $fecha, $destacado, $autor_id, $_SESSION['usuario_id'],
+            $fecha, $es_destacado, $autor_id, $_SESSION['usuario_id'], $estado
         ]);
+
+        // --- NUEVO: Redirección según botón presionado ---
+        if (isset($_POST['accion_previsualizar'])) {
+            $id_nuevo = $pdo->lastInsertId();
+            header("Location: ver.php?id=" . $id_nuevo);
+            exit;
+        }
 
         header('Location: listar.php?ok=1');
         exit;
+
     } catch (Exception $e) {
         $error = $e->getMessage();
     }
@@ -102,9 +117,22 @@ require __DIR__ . '/../partials/header.php';
                     </div>
                 </div>
             </div>
+        
+            <!-- Busca el botón de guardar actual y agrégale estas opciones -->
+            <div class="d-flex gap-2 justify-content-end mt-4">
+                <button type="submit" name="accion_borrador" value="1" class="btn btn-secondary">
+                    Guardar como Borrador
+                </button>
+                <button type="submit" name="accion_previsualizar" value="1" class="btn btn-info text-white">
+                    Previsualizar
+                </button>
+                <button type="submit" name="accion_publicar" value="1" class="btn btn-primary">
+                    Publicar Reportaje
+                </button>
 
-            <button type="submit" class="btn btn-primary">Guardar reportaje</button>
-            <a href="listar.php" class="btn btn-outline-secondary">Cancelar</a>
+                <a href="listar.php" class="btn btn-outline-secondary">Cancelar</a>
+            </div>    
+
         </form>
     </div>
 </div>

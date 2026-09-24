@@ -4,11 +4,11 @@ require_once __DIR__ . '/includes/functions.php';
 
 $porPagina = 9;
 $pagina = max(1, (int) ($_GET['pagina'] ?? 1));
-$total = (int) $pdo->query("SELECT COUNT(*) FROM reportajes")->fetchColumn();
+$total = (int) $pdo->query("SELECT COUNT(*) FROM reportajes WHERE estado = 'publicado'")->fetchColumn();
 $totalPaginas = max(1, (int) ceil($total / $porPagina));
 $offset = ($pagina - 1) * $porPagina;
 
-$stmt = $pdo->prepare("SELECT * FROM reportajes ORDER BY fecha_publicacion DESC LIMIT :lim OFFSET :off");
+$stmt = $pdo->prepare("SELECT * FROM reportajes WHERE estado = 'publicado' ORDER BY fecha_publicacion DESC, id DESC LIMIT :lim OFFSET :off");
 $stmt->bindValue(':lim', $porPagina, PDO::PARAM_INT);
 $stmt->bindValue(':off', $offset, PDO::PARAM_INT);
 $stmt->execute();

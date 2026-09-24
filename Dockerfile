@@ -1,12 +1,15 @@
 FROM php:8.2-apache
 
-# Instalar controladores de MySQL requeridos por PDO y mysqli
+# Instalar extensiones requeridas de MySQL
 RUN docker-php-ext-install pdo pdo_mysql mysqli
 
-# Copiar todos los archivos del proyecto al servidor Apache
+# Copiar archivos del proyecto al directorio web de Apache
 COPY . /var/www/html/
 
-# Configurar Apache para escuchar en el puerto que asigna Railway
+# Mapear el puerto asignado por Railway al puerto de Apache
 RUN sed -i 's/80/${PORT}/g' /etc/apache2/ports.conf /etc/apache2/sites-available/000-default.conf
 
-EXPOSE 80
+# Habilitar mod_rewrite si tu proyecto usa redirecciones
+RUN a2enmod rewrite
+
+CMD ["apache2-foreground"]

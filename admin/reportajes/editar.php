@@ -27,6 +27,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             throw new Exception('Título, desarrollo y fecha son obligatorios.');
         }
 
+        // 1. DETERMINAR EL ESTADO (¡ESTO ERA LO QUE FALTABA!)
+        $estado = 'publicado';
+        if (isset($_POST['accion_borrador']) || isset($_POST['accion_previsualizar'])) {
+            $estado = 'borrador';
+        }
+
         // Si suben un archivo nuevo, reemplaza el anterior; si no, se conserva el que ya había
         $fotoNueva = subir_imagen('foto_principal', 'reportajes');
         if ($fotoNueva) {
@@ -47,12 +53,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt = $pdo->prepare(
             "UPDATE reportajes SET
                 titulo = ?, resumen_corto = ?, desarrollo = ?, foto_principal = ?,
-                pdf_adjunto = ?, fecha_publicacion = ?, es_destacado = ?, autor_id = ?
+                pdf_adjunto = ?, fecha_publicacion = ?, es_destacado = ?, autor_id = ?, estado = ?
              WHERE id = ?"
         );
         $stmt->execute([
             $titulo, $resumen_corto, $desarrollo, $foto, $pdf,
-            $fecha, $destacado, $autor_id, $id,
+            $fecha, $destacado, $autor_id, $estado, $id,
         ]);
 
         header('Location: listar.php?ok=1');
@@ -141,8 +147,17 @@ require __DIR__ . '/../partials/header.php';
                 </div>
             </div>
 
-            <button type="submit" class="btn btn-primary">Guardar cambios</button>
-            <a href="listar.php" class="btn btn-outline-secondary">Cancelar</a>
+            <div class="d-flex gap-2 justify-content-end mt-4">
+                <button type="submit" name="accion_borrador" value="1" class="btn btn-secondary">
+                    Guardar como Borrador
+                </button>
+                <button type="submit" name="accion_previsualizar" value="1" class="btn btn-info text-white">
+                    Previsualizar
+                </button>
+                <button type="submit" name="accion_publicar" value="1" class="btn btn-primary">
+                    Guardar y Publicar
+                </button>
+            </div>
         </form>
     </div>
 </div>
